@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿html = r"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -64,7 +64,7 @@ document.getElementById("t").textContent="Updated: "+new Date(D.generated_at).to
 s(0)
 }catch(e){
 document.getElementById("t").textContent="Error: "+e.message;
-document.getElementById("c").innerHTML='<div class="empty"><h3>Failed</h3><p>'+e.message+'</p></div>';
+document.getElementById("c").innerHTML='<div class="empty"><h3>Data Load Failed</h3><p>'+e.message+'</p><p>Run: python build_dashboard.py then python server.py</p></div>';
 }
 }
 function s(n){
@@ -73,9 +73,9 @@ if(n===0)r0();else r1()
 }
 function r0(){
 if(!D||!D.hot_topics||D.hot_topics.length===0){
-document.getElementById("c").innerHTML='<div class="empty"><h3>No topics</h3><p>Run: python build_dashboard.py</p></div>';return
+document.getElementById("c").innerHTML='<div class="empty"><h3>No hot topics yet</h3><p>Run python aggregator.py then python build_dashboard.py</p></div>';return
 }
-var h='<div class="stats-bar"><div class="stat"><div class="val">'+D.hot_topics.length+'</div><div class="lbl">Events</div></div><div class="stat"><div class="val">'+D.total_recent_items+'</div><div class="lbl">48h Items</div></div></div>';
+var h='<div class="stats-bar"><div class="stat"><div class="val">'+D.hot_topics.length+'</div><div class="lbl">Topics</div></div><div class="stat"><div class="val">'+D.total_recent_items+'</div><div class="lbl">48h Items</div></div></div>';
 D.hot_topics.forEach(function(t){
 h+='<div class="topic-card">';
 h+='<div class="topic-header"><div class="rank'+(t.rank>3?' small':'')+'">#'+t.rank+'</div><div class="topic-info"><div class="topic-title">'+t.event+'<span class="badge">'+t.resonance+' sources</span></div></div></div>';
@@ -96,7 +96,7 @@ D.hot_topics.forEach(function(t,i){
 h+='<div class="topic-card">';
 h+='<div class="topic-header"><div class="rank'+(t.rank>3?' small':'')+'">#'+t.rank+'</div><div class="topic-info"><div class="topic-title">'+t.event+'<span class="badge">'+t.resonance+' sources</span></div></div></div>';
 h+='<div class="section-divider"><div class="line"></div><span>BILIBILI 48H TOP10</span><div class="line"></div></div>';
-h+='<div class="loading" id="bl'+i+'"><div class="spinner"></div>Searching Bilibili for: '+t.search_query+'</div>';
+h+='<div class="loading" id="bl'+i+'"><div class="spinner"></div>Searching...</div>';
 h+='<div class="video-grid" id="bv'+i+'"></div></div>';
 });
 document.getElementById("c").innerHTML=h;
@@ -107,9 +107,8 @@ var le=document.getElementById("bl"+i);
 var ve=document.getElementById("bv"+i);
 if(B[k]){rv(ve,le,B[k]);return}
 try{
-// Try direct B站 API call from browser (has real Chrome TLS fingerprint)
-var u="https://api.bilibili.com/x/web-interface/search/type?search_type=video&order=pubdate&duration=2&page=1&keyword="+encodeURIComponent(k);
-var r=await fetch(u,{headers:{Referer:"https://www.bilibili.com"}});
+var u="/api/bilibili-search?keyword="+encodeURIComponent(k);
+var r=await fetch(u);
 var d=await r.json();
 if(d.code===0&&d.data&&d.data.result){
 var cut=Date.now()-48*60*60*1000;
@@ -117,10 +116,10 @@ var v=d.data.result.filter(function(x){return x.pubdate*1000>cut}).sort(function
 B[k]=v;
 rv(ve,le,v);
 }else{
-if(le)le.innerHTML='<div class="empty">No videos found</div>';
+if(le)le.innerHTML='<div class="empty">No videos found for: '+k+'</div>';
 }
 }catch(e){
-if(le)le.innerHTML='<div class="empty">CORS blocked. Try proxy: /api/bilibili-search?keyword='+encodeURIComponent(k)+'</div>';
+if(le)le.innerHTML='<div class="empty">Bilibili API error: '+e.message+'</div>';
 }
 }
 function rv(ve,le,v){
@@ -134,4 +133,8 @@ return '<a href="https://www.bilibili.com/video/'+x.bvid+'" target="_blank" clas
 L();
 </script>
 </body>
-</html>
+</html>"""
+
+with open("C:/Users/qiyanxi/Bitto/default/ai-hotboard/dashboard.html", "w", encoding="utf-8") as f:
+    f.write(html)
+print("dashboard.html updated - event-oriented + proxy API")

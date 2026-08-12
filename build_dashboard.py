@@ -1,108 +1,131 @@
 ﻿import json, re, sys, io
 from pathlib import Path
 from datetime import datetime, timedelta
-from collections import defaultdict
 from email.utils import parsedate_to_datetime
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-BASE = Path("C:/Users/qiyanxi/Bitto/default/ai-hotboard")
-DATA = BASE / "data"
+DATA = Path("C:/Users/qiyanxi/Bitto/default/ai-hotboard/data")
 
 items = json.loads((DATA / "ai_feed.json").read_text(encoding="utf-8"))
 now = datetime.now()
 cutoff = now - timedelta(hours=48)
-recent = [it for it in items if parsedate_to_datetime(it.get("published", "")).replace(tzinfo=None) >= cutoff]
+recent = [it for it in items if parsedate_to_datetime(it.get("published","")).replace(tzinfo=None) >= cutoff]
+print("Recent (48h): {}".format(len(recent)))
 
-# Filter out generic words
-SKIP_KW = {"模型", "发布", "支持", "智能", "机器", "提供", "功能", "用户",
-           "数据", "技术", "能力", "完成", "发现", "创建", "实现", "推出",
-           "公司", "报道", "消息", "如何", "公布", "宣布", "正式", "最新"}
+# Filter out garbage items
+good = []
+bad_patterns = [
+    r'^RT\s*@', r'^R\s+to\s+@', r'^Pinned:', r'^(Just|Check|Try)\s',
+    r'^\s*$', r'^🤔', r'^🔥', r'^\d+%', r'^@\w+$',
+]
+for it in recent:
+    title = it.get("title","").strip()
+    skip = False
+    for pat in bad_patterns:
+        if re.search(pat, title):
+            skip = True
+            break
+    if not skip and len(title) > 10:
+        good.append(it)
+print("Good items: {}".format(len(good)))
 
-PATTERNS = {
-    "OpenAI|GPT-5": r"OpenAI|GPT[-\s]*5",
-    "Anthropic|Claude": r"Anthropic|Claude",
-    "NVIDIA|Nemotron": r"NVIDIA|Nemotron",
-    "DeepSeek": r"DeepSeek",
-    "Muse|Glimmer": r"Muse|Glimmer",
-    "Gemini": r"Gemini",
-    "Meta|Llama": r"Meta|Llama",
-    "Mistral": r"Mistral",
-    "Qwen|通义千问": r"Qwen|千问",
-    "Grok|xAI": r"Grok|xAI",
-    "Runway|Seedance": r"Runway|Seedance",
-    "Manus": r"Manus",
-    "宇树|IPO|上市": r"宇树|IPO|上市|融资",
-    "Agent|智能体|MCP": r"Agent|智能体|MCP",
-    "开源模型": r"开源.*模型|模型.*开源",
-    "视频生成": r"视频生成|Seedance|LTX",
-    "语音|TTS": r"语音|TTS|VoiceChat",
-    "AI安全|漏洞": r"安全|漏洞|越狱|攻击|网络",
-    "芯片|算力|昇腾": r"芯片|昇腾|GPU|算力|数据中心",
-    "数学|推理": r"数学|推理|黎曼",
-    "机器人|具身": r"机器人|具身",
-    "SpaceX": r"SpaceX",
-    "Google|谷歌": r"Google|谷歌",
-}
+# Use summaries for matching - they are cleaner
+def extract_named_entities(text):
+    """Extract named entities: companies, products, models"""
+    ents = set()
+    # Companies
+    companies = ["OpenAI","Anthropic","NVIDIA","英伟达","DeepSeek","Meta","Google","谷歌",
+                 "Microsoft","微软","xAI","Mistral","Perplexity","Runway","Manus",
+                 "宇树科技","智谱","通义千问","千问","百灵","面壁","火山引擎",
+                 "字节跳动","腾讯","阿里","华为","商汤","SpaceX","Tesla"]
+    text_lower = text.lower()
+    for c in companies:
+        if c.lower() in text_lower:
+            ents.add(c)
+    # Models/Products
+    models = re.findall(r'(GPT[-\s]?\d+\.?\d*\s*\w*|Claude\s*[A-Z]\w*\s*\d+\.?\d*|Gemini\s*\d+\.?\d*|'
+                         r'Nemotron[-\s]?\d+\.?\d*\s*\w*|Llama[-\s]?\d+|Muse\s*\w+|Grok[-\s]?\d+\.?\d*|'
+                         r'Seedance[-\s]?\d+\.?\d*|Qwen[-\s]?\d+\.?\d*|LTX[-\s]?\d+\.?\d*|'
+                         r'Cosmos\s*\d|WeatherNext|IndexTTS|Wan\d+\.?\d+|GLM[-\s]?\d+\.?\d*|'
+                         r'Mojo\s*1\.\d|Astra|Opus\s*\d+\.?\d*|Fable\s*\d+|SGLang|OpenClaw)', text, re.I)
+    for m in models:
+        ents.add(m.strip())
+    return ents
 
-kw_items = defaultdict(set)
-for name, pat in PATTERNS.items():
-    for item in recent:
-        text = item.get("title", "") + " " + item.get("summary", "")
-        if re.search(pat, text, re.IGNORECASE):
-            kw_items[name].add(item.get("fingerprint", ""))
+# For each good item: extract entities from summary
+for it in good:
+    it["ents"] = extract_named_entities(it.get("summary","") + " " + it.get("title",""))
 
-# Add Chinese bigrams (3+ sources)
-cn = defaultdict(set)
-for item in recent:
-    title = item.get("title", "")
-    for w in re.findall(r"[\u4e00-\u9fff]{2}", title):
-        if w not in SKIP_KW:
-            cn[w].add(item.get("fingerprint", ""))
-for w, ids in sorted(cn.items(), key=lambda x: -len(x[1])):
-    if len(ids) >= 3 and w not in kw_items and w not in SKIP_KW:
-        kw_items[""+w+""] = ids  # Use raw Chinese word
-
-# Cluster
-clusters, assigned = [], set()
-for kw, ids in sorted(kw_items.items(), key=lambda x: -len(x[1])):
-    if len(ids) < 2: continue
-    cluster_items = [it for it in recent if it.get("fingerprint") in ids and it.get("fingerprint") not in assigned]
-    if len(cluster_items) < 2: continue
-    for it in cluster_items:
-        assigned.add(it.get("fingerprint", ""))
+# Cluster: group items sharing >= 2 named entities
+clusters = []
+assigned = set()
+for it in good:
+    fp = it.get("fingerprint","")
+    if fp in assigned: continue
+    if not it["ents"]: continue  # skip items without identifiable entities
     
-    sources = {}
-    for it in cluster_items:
-        sn = it.get("source_name", "unknown")
-        if sn not in sources:
-            sources[sn] = {"name": sn, "url": it.get("url", ""), "title": it.get("title", "")[:80]}
+    cluster = [it]
+    assigned.add(fp)
+    for other in good:
+        ofp = other.get("fingerprint","")
+        if ofp in assigned: continue
+        shared = it["ents"] & other["ents"]
+        if len(shared) >= 2:
+            cluster.append(other)
+            assigned.add(ofp)
     
-    clusters.append({
-        "keyword": kw.split("|")[0],
-        "resonance": len(sources),
-        "item_count": len(cluster_items),
-        "sources": list(sources.values()),
-        "representative_titles": [it.get("title","") for it in cluster_items[:3]],
-        "search_query": kw.split("|")[0].replace("\"", ""),
-    })
+    if len(cluster) >= 2:
+        # Pick best event name: prefer item with most descriptive title
+        # Score: Chinese > English, shorter > longer, has company name
+        def score_title(x):
+            t = x.get("title","")
+            s = 0
+            if re.search(r'[\u4e00-\u9fff]', t): s += 100
+            s -= len(t)  # shorter is better
+            if any(c.lower() in t.lower() for c in ["发布","推出","开源","上市","发布","突破","达成"]): s += 50
+            return s
+        
+        cluster.sort(key=score_title, reverse=True)
+        event_name = cluster[0].get("title","")[:100]
+        
+        sources = {}
+        for c in cluster:
+            sn = c.get("source_name","unknown")
+            if sn not in sources:
+                sources[sn] = {"name": sn, "url": c.get("url",""), "title": c.get("title","")[:80]}
+        
+        # Search query from shared entities
+        sq = " ".join(list(it["ents"])[:3])
+        
+        clusters.append({
+            "event": event_name,
+            "resonance": len(sources),
+            "item_count": len(cluster),
+            "sources": list(sources.values()),
+            "search_query": sq,
+        })
 
 clusters.sort(key=lambda x: -x["resonance"])
-top = [c for c in clusters if c["resonance"] >= 2][:15]
+clusters = [c for c in clusters if c["resonance"] >= 2][:15]
+
+print("\nEvent Topics: {}".format(len(clusters)))
+for i, c in enumerate(clusters):
+    print("  {:2}. [{} src] {}".format(i+1, c["resonance"], c["event"][:90]))
+    for s in c["sources"][:3]:
+        print("       - {}".format(s["name"][:45]))
 
 dashboard = {
     "generated_at": now.isoformat(),
     "total_recent_items": len(recent),
     "hot_topics": [{
-        "rank": i, "keyword": c["keyword"], "resonance": c["resonance"],
+        "rank": i,
+        "event": c["event"],
+        "resonance": c["resonance"],
         "item_count": c["item_count"],
-        "summary": c["representative_titles"][0][:120],
-        "titles": c["representative_titles"],
         "sources": c["sources"],
         "search_query": c["search_query"],
-    } for i, c in enumerate(top, 1)]
+    } for i, c in enumerate(clusters, 1)]
 }
 
 (DATA / "dashboard.json").write_text(json.dumps(dashboard, ensure_ascii=False, indent=2), encoding="utf-8")
-for i, c in enumerate(top):
-    print("  {:2}. [{}] {} sources".format(i+1, c["keyword"], c["resonance"]))
-print("Done: {} topics saved".format(len(top)))
+print("\nSaved {} topics".format(len(clusters)))

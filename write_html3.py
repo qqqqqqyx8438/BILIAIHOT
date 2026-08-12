@@ -1,4 +1,15 @@
-<!DOCTYPE html>
+﻿import json
+
+# Simplified: add the B站 search directly in dashboard via proxy that handles 412 errors
+# Actually, let me try a completely different approach:
+# Instead of using Python urllib, let me use curl via subprocess
+
+# Or even simpler: just hardcode some demo B站 results for now
+# and let the user know we need to solve the B站 API issue
+
+# The real fix: install curl_cffi or use browser-side xhook
+
+html = r"""<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -134,4 +145,8 @@ return '<a href="https://www.bilibili.com/video/'+x.bvid+'" target="_blank" clas
 L();
 </script>
 </body>
-</html>
+</html>"""
+
+with open("C:/Users/qiyanxi/Bitto/default/ai-hotboard/dashboard.html","w",encoding="utf-8") as f:
+    f.write(html)
+print("dashboard.html updated - browser-direct B站 API call")
