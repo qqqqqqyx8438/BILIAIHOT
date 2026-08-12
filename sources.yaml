@@ -1,0 +1,338 @@
+settings:
+  max_items_per_source: 20
+  output_dir: ./data
+  retention_days: 7
+  rsshub_base: http://localhost:1200
+  update_interval_minutes: 30
+sources:
+- category: KOL
+  enabled: true
+  id: x_kol_karpathy
+  name: Andrej Karpathy
+  tags:
+  - AI
+  - 教育
+  - 大模型
+  type: native_rss
+  url: https://nitter.net/kaborobot/rss
+- category: KOL
+  enabled: true
+  id: x_kol_sama
+  name: Sam Altman
+  tags:
+  - OpenAI
+  - AGI
+  type: native_rss
+  url: https://nitter.net/sama/rss
+- category: KOL
+  enabled: true
+  id: x_kol_ylecun
+  name: Yann LeCun
+  tags:
+  - Meta
+  - 学术
+  type: native_rss
+  url: https://nitter.net/ylecun/rss
+- category: KOL
+  enabled: true
+  id: x_kol_andrewng
+  name: Andrew Ng
+  tags:
+  - AI教育
+  - 创业
+  type: native_rss
+  url: https://nitter.net/AndrewYNg/rss
+- category: KOL
+  enabled: true
+  id: x_kol_jimfan
+  name: Jim Fan
+  tags:
+  - NVIDIA
+  - 具身智能
+  type: native_rss
+  url: https://nitter.net/DrJimFan/rss
+- category: KOL
+  enabled: true
+  id: x_kol_akhaliq
+  name: AK（论文速递）
+  tags:
+  - 论文
+  - 速递
+  type: native_rss
+  url: https://nitter.net/_akhaliq/rss
+- category: KOL
+  enabled: true
+  id: x_kol_teknium
+  name: Teknium
+  tags:
+  - 开源
+  - Agent
+  type: native_rss
+  url: https://nitter.net/Teknium/rss
+- category: KOL
+  enabled: true
+  id: x_kol_rohanpaul
+  name: Rohan Paul
+  tags:
+  - 资讯聚合
+  type: native_rss
+  url: https://nitter.net/rohanpaul_ai/rss
+- category: KOL
+  enabled: true
+  id: x_kol_svpino
+  name: Santiago
+  tags:
+  - ML实战
+  type: native_rss
+  url: https://nitter.net/svpino/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_openai
+  name: OpenAI
+  tags:
+  - OpenAI
+  - 产品发布
+  type: native_rss
+  url: https://nitter.net/OpenAI/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_anthropic
+  name: Anthropic
+  tags:
+  - Claude
+  - Anthropic
+  type: native_rss
+  url: https://nitter.net/AnthropicAI/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_deepmind
+  name: Google DeepMind
+  tags:
+  - Google
+  - 研究
+  type: native_rss
+  url: https://nitter.net/GoogleDeepMind/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_metaai
+  name: Meta AI
+  tags:
+  - Meta
+  - Llama
+  type: native_rss
+  url: https://nitter.net/AIatMeta/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_xai
+  name: xAI（Grok）
+  tags:
+  - xAI
+  - Grok
+  type: native_rss
+  url: https://nitter.net/xai/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_mistral
+  name: Mistral AI
+  tags:
+  - 开源
+  - 欧洲
+  type: native_rss
+  url: https://nitter.net/MistralAI/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_huggingface
+  name: Hugging Face
+  tags:
+  - 开源
+  - 模型
+  type: native_rss
+  url: https://nitter.net/huggingface/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_nvidia
+  name: NVIDIA AI
+  tags:
+  - GPU
+  - 硬件
+  type: native_rss
+  url: https://nitter.net/nvidia/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_deepseek
+  name: DeepSeek
+  tags:
+  - DeepSeek
+  - 国产
+  type: native_rss
+  url: https://nitter.net/deepseek_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_perplexity
+  name: Perplexity
+  tags:
+  - AI搜索
+  type: native_rss
+  url: https://nitter.net/perplexity_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_cursor
+  name: Cursor
+  tags:
+  - AI编程
+  type: native_rss
+  url: https://nitter.net/cursor_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_comp_qwen
+  name: 通义千问
+  tags:
+  - 阿里
+  - 国产模型
+  type: native_rss
+  url: https://nitter.net/Alibaba_Qwen/rss
+- category: 研究机构
+  enabled: true
+  id: x_inst_stanford
+  name: Stanford HAI
+  tags:
+  - 学术
+  - 斯坦福
+  type: native_rss
+  url: https://nitter.net/StanfordHAI/rss
+- category: 研究机构
+  enabled: true
+  id: x_inst_mit
+  name: MIT CSAIL
+  tags:
+  - 学术
+  - MIT
+  type: native_rss
+  url: https://nitter.net/MIT_CSAIL/rss
+- category: 研究机构
+  enabled: true
+  id: x_inst_berkeley
+  name: Berkeley AI
+  tags:
+  - 学术
+  - Berkeley
+  type: native_rss
+  url: https://nitter.net/berkeley_ai/rss
+- category: 媒体
+  enabled: true
+  id: x_media_techreview
+  name: MIT Technology Review
+  tags:
+  - 科技评论
+  type: native_rss
+  url: https://nitter.net/techreview/rss
+- category: 媒体
+  enabled: true
+  id: x_media_tldr
+  name: TLDR Newsletter
+  tags:
+  - 每日简报
+  type: native_rss
+  url: https://nitter.net/TLDRNewsletter/rss
+- category: 媒体
+  enabled: true
+  id: x_media_alphasignal
+  name: AlphaSignal
+  tags:
+  - AI资讯
+  type: native_rss
+  url: https://nitter.net/AlphaSignalAI/rss
+- category: 论文
+  enabled: true
+  id: paper_arxiv_ai
+  name: arXiv CS.AI
+  tags:
+  - AI
+  - 每日
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.AI
+- category: 论文
+  enabled: true
+  id: paper_arxiv_cl
+  name: arXiv CS.CL
+  tags:
+  - NLP
+  - 每日
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.CL
+- category: 论文
+  enabled: true
+  id: paper_arxiv_cv
+  name: arXiv CS.CV
+  tags:
+  - CV
+  - 每日
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.CV
+- category: 论文
+  enabled: true
+  id: paper_hf_daily
+  name: HuggingFace Daily Papers
+  tags:
+  - 精选
+  - 每日
+  type: native_rss
+  url: https://huggingface.co/papers/feed.xml
+- category: 中文媒体
+  enabled: true
+  id: cn_jiqizhixin
+  name: 机器之心
+  tags:
+  - 产业
+  - 技术
+  type: native_rss
+  url: https://www.jiqizhixin.com/rss
+- category: 中文媒体
+  enabled: true
+  id: cn_qbitai
+  name: 量子位
+  tags:
+  - AI资讯
+  type: native_rss
+  url: https://www.qbitai.com/feed
+- category: 开源
+  enabled: true
+  id: code_github_trending_python
+  name: GitHub Trending Python
+  tags:
+  - GitHub
+  - 每日
+  type: native_rss
+  url: https://github.com/trending/python.atom
+- category: 官方博客
+  enabled: true
+  id: blog_openai
+  name: OpenAI Blog
+  tags:
+  - OpenAI
+  type: native_rss
+  url: https://openai.com/blog/rss.xml
+- category: 官方博客
+  enabled: true
+  id: blog_deepmind
+  name: Google DeepMind Blog
+  tags:
+  - DeepMind
+  type: native_rss
+  url: https://deepmind.google/blog/rss.xml
+- category: 官方博客
+  enabled: true
+  id: blog_anthropic
+  name: Anthropic Research
+  tags:
+  - Anthropic
+  type: native_rss
+  url: https://www.anthropic.com/research/feed.xml
+- category: 官方博客
+  enabled: true
+  id: blog_meta
+  name: Meta AI Blog
+  tags:
+  - Meta
+  type: native_rss
+  url: https://ai.meta.com/blog/feed.xml
