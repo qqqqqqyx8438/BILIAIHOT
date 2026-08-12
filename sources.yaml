@@ -1,192 +1,235 @@
-﻿# ============================================================
-# AI 热点看板 · 信源配置 v2
-# ============================================================
-# 架构：AIHOT 聚合源（自动拆回单信源） + 独立补充源
-# 增删修改：只改这个文件，python aggregator.py 即刻生效
-# ============================================================
-
-sources:
-
-  # ====================================================================
-  # AIHOT 聚合分类源（每个 feed 内含数十个信源，自动拆解）
-  # 要增减其中某个信源：改 source_filter / whitelist / blacklist
-  # ====================================================================
-  - id: aihot_ai_models
-    name: AIHOT · AI 模型
-    type: aggregate_rss
-    url: https://aihot.virxact.com/feed/category/ai-models.xml
-    category: AI模型
-    tags: [AIHOT, 大模型, 开源]
-    enabled: true
-    source_filter: all          # all | whitelist | blacklist
-    exclude_sources: []          # 排除不想要的源
-
-  - id: aihot_ai_products
-    name: AIHOT · AI 产品
-    type: aggregate_rss
-    url: https://aihot.virxact.com/feed/category/ai-products.xml
-    category: AI产品
-    tags: [AIHOT, 产品发布, 工具]
-    enabled: true
-    source_filter: all
-    exclude_sources: []
-
-  - id: aihot_industry
-    name: AIHOT · 行业动态
-    type: aggregate_rss
-    url: https://aihot.virxact.com/feed/category/industry.xml
-    category: 行业动态
-    tags: [AIHOT, 商业, 政策, 融资]
-    enabled: true
-    source_filter: all
-    exclude_sources: []
-
-  - id: aihot_paper
-    name: AIHOT · 论文精选
-    type: aggregate_rss
-    url: https://aihot.virxact.com/feed/category/paper.xml
-    category: 论文
-    tags: [AIHOT, 学术, 研究]
-    enabled: true
-    source_filter: all
-    exclude_sources: []
-
-  - id: aihot_tip
-    name: AIHOT · 技巧观点
-    type: aggregate_rss
-    url: https://aihot.virxact.com/feed/category/tip.xml
-    category: 技巧观点
-    tags: [AIHOT, 教程, 观点, 分析]
-    enabled: true
-    source_filter: all
-    exclude_sources: []
-
-  # ====================================================================
-  # 自维护独立信源（AIHOT 没覆盖或需要更细粒度的）
-  # 增删修改：直接在这里加/删/改块
-  # ====================================================================
-
-  # -- X 核心 KOL（AIHOT 未覆盖的） --
-  - id: x_karpathy
-    name: Andrej Karpathy
-    type: native_rss
-    url: https://nitter.net/kaborobot/rss
-    category: KOL
-    tags: [OpenAI, 教育]
-    enabled: true
-
-  - id: x_sama
-    name: Sam Altman
-    type: native_rss
-    url: https://nitter.net/sama/rss
-    category: KOL
-    tags: [OpenAI, AGI]
-    enabled: true
-
-  - id: x_ylecun
-    name: Yann LeCun
-    type: native_rss
-    url: https://nitter.net/ylecun/rss
-    category: KOL
-    tags: [Meta, 学术]
-    enabled: true
-
-  - id: x_andrewng
-    name: Andrew Ng
-    type: native_rss
-    url: https://nitter.net/AndrewYNg/rss
-    category: KOL
-    tags: [AI教育, 创业]
-    enabled: true
-
-  - id: x_jimfan
-    name: Jim Fan
-    type: native_rss
-    url: https://nitter.net/DrJimFan/rss
-    category: KOL
-    tags: [NVIDIA, 具身智能]
-    enabled: true
-
-  # -- X 企业号（AIHOT 未覆盖的细粒度账号） --
-  - id: x_deepseek
-    name: DeepSeek
-    type: native_rss
-    url: https://nitter.net/deepseek_ai/rss
-    category: 企业官号
-    tags: [DeepSeek, 国产]
-    enabled: true
-
-  - id: x_perplexity
-    name: Perplexity
-    type: native_rss
-    url: https://nitter.net/perplexity_ai/rss
-    category: 企业官号
-    tags: [AI搜索]
-    enabled: true
-
-  - id: x_cursor
-    name: Cursor
-    type: native_rss
-    url: https://nitter.net/cursor_ai/rss
-    category: 企业官号
-    tags: [AI编程]
-    enabled: true
-
-  - id: x_mistral
-    name: Mistral AI
-    type: native_rss
-    url: https://nitter.net/MistralAI/rss
-    category: 企业官号
-    tags: [开源, 欧洲]
-    enabled: true
-
-  - id: x_huggingface
-    name: Hugging Face
-    type: native_rss
-    url: https://nitter.net/huggingface/rss
-    category: 企业官号
-    tags: [开源, 模型]
-    enabled: true
-
-  # -- 中文源 --
-  - id: cn_qbitai
-    name: 量子位
-    type: native_rss
-    url: https://www.qbitai.com/feed
-    category: 中文媒体
-    tags: [AI资讯, 国内]
-    enabled: true
-
-  # -- arXiv 论文全量（AIHOT 只给精选，这里补全量） --
-  - id: paper_arxiv_ai
-    name: arXiv CS.AI
-    type: native_rss
-    url: https://rss.arxiv.org/rss/cs.AI
-    category: 论文全量
-    tags: [AI, 每日, 全量]
-    enabled: false           # 默认关闭，需要全量论文时再开
-
-  - id: paper_arxiv_cl
-    name: arXiv CS.CL
-    type: native_rss
-    url: https://rss.arxiv.org/rss/cs.CL
-    category: 论文全量
-    tags: [NLP, 每日, 全量]
-    enabled: false
-
-  - id: paper_arxiv_cv
-    name: arXiv CS.CV
-    type: native_rss
-    url: https://rss.arxiv.org/rss/cs.CV
-    category: 论文全量
-    tags: [CV, 每日, 全量]
-    enabled: false
-
-# ============================================================
-# 全局配置
-# ============================================================
 settings:
-  output_dir: ./data
-  update_interval_minutes: 30
   max_items_per_source: 30
+  output_dir: ./data
   retention_days: 7
+  update_interval_minutes: 30
+sources:
+- category: AI模型
+  enabled: true
+  exclude_sources: []
+  id: aihot_ai_models
+  name: AIHOT · AI 模型
+  source_filter: all
+  tags:
+  - AIHOT
+  - 大模型
+  - 开源
+  type: aggregate_rss
+  url: https://aihot.virxact.com/feed/category/ai-models.xml
+- category: AI产品
+  enabled: true
+  exclude_sources: []
+  id: aihot_ai_products
+  name: AIHOT · AI 产品
+  source_filter: all
+  tags:
+  - AIHOT
+  - 产品发布
+  - 工具
+  type: aggregate_rss
+  url: https://aihot.virxact.com/feed/category/ai-products.xml
+- category: 行业动态
+  enabled: true
+  exclude_sources: []
+  id: aihot_industry
+  name: AIHOT · 行业动态
+  source_filter: all
+  tags:
+  - AIHOT
+  - 商业
+  - 政策
+  - 融资
+  type: aggregate_rss
+  url: https://aihot.virxact.com/feed/category/industry.xml
+- category: 论文
+  enabled: true
+  exclude_sources: []
+  id: aihot_paper
+  name: AIHOT · 论文精选
+  source_filter: all
+  tags:
+  - AIHOT
+  - 学术
+  - 研究
+  type: aggregate_rss
+  url: https://aihot.virxact.com/feed/category/paper.xml
+- category: 技巧观点
+  enabled: true
+  exclude_sources: []
+  id: aihot_tip
+  name: AIHOT · 技巧观点
+  source_filter: all
+  tags:
+  - AIHOT
+  - 教程
+  - 观点
+  - 分析
+  type: aggregate_rss
+  url: https://aihot.virxact.com/feed/category/tip.xml
+- category: KOL
+  enabled: true
+  id: x_karpathy
+  name: Andrej Karpathy
+  tags:
+  - OpenAI
+  - 教育
+  type: native_rss
+  url: https://nitter.net/kaborobot/rss
+- category: KOL
+  enabled: true
+  id: x_sama
+  name: Sam Altman
+  tags:
+  - OpenAI
+  - AGI
+  type: native_rss
+  url: https://nitter.net/sama/rss
+- category: KOL
+  enabled: true
+  id: x_ylecun
+  name: Yann LeCun
+  tags:
+  - Meta
+  - 学术
+  type: native_rss
+  url: https://nitter.net/ylecun/rss
+- category: KOL
+  enabled: true
+  id: x_andrewng
+  name: Andrew Ng
+  tags:
+  - AI教育
+  - 创业
+  type: native_rss
+  url: https://nitter.net/AndrewYNg/rss
+- category: KOL
+  enabled: true
+  id: x_jimfan
+  name: Jim Fan
+  tags:
+  - NVIDIA
+  - 具身智能
+  type: native_rss
+  url: https://nitter.net/DrJimFan/rss
+- category: 企业官号
+  enabled: true
+  id: x_deepseek
+  name: DeepSeek
+  tags:
+  - DeepSeek
+  - 国产
+  type: native_rss
+  url: https://nitter.net/deepseek_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_perplexity
+  name: Perplexity
+  tags:
+  - AI搜索
+  type: native_rss
+  url: https://nitter.net/perplexity_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_cursor
+  name: Cursor
+  tags:
+  - AI编程
+  type: native_rss
+  url: https://nitter.net/cursor_ai/rss
+- category: 企业官号
+  enabled: true
+  id: x_mistral
+  name: Mistral AI
+  tags:
+  - 开源
+  - 欧洲
+  type: native_rss
+  url: https://nitter.net/MistralAI/rss
+- category: 企业官号
+  enabled: true
+  id: x_huggingface
+  name: Hugging Face
+  tags:
+  - 开源
+  - 模型
+  type: native_rss
+  url: https://nitter.net/huggingface/rss
+- category: 中文媒体
+  enabled: true
+  id: cn_qbitai
+  name: 量子位
+  tags:
+  - AI资讯
+  - 国内
+  type: native_rss
+  url: https://www.qbitai.com/feed
+- category: 中文媒体
+  enabled: true
+  id: cn_infoq
+  name: InfoQ 中国
+  tags:
+  - AI
+  - 开发
+  - 架构
+  type: native_rss
+  url: https://www.infoq.cn/feed
+- category: 中文媒体
+  enabled: true
+  id: cn_latepost
+  name: 晚点LatePost
+  tags:
+  - 商业
+  - 科技
+  - 深度
+  type: native_rss
+  url: https://feedpress.me/wx-postlate
+- category: 中文媒体
+  enabled: false
+  id: cn_jiqizhixin
+  name: 机器之心
+  tags:
+  - AI
+  - 产业
+  - 技术
+  type: native_rss
+  url: https://www.jiqizhixin.com/rss
+- category: 中文媒体
+  enabled: false
+  id: cn_techqq
+  name: 腾讯科技
+  tags:
+  - 科技
+  - 互联网
+  - 深度
+  type: native_rss
+  url: https://tech.qq.com/web/feed.xml
+- category: 论文全量
+  enabled: false
+  id: paper_arxiv_ai
+  name: arXiv CS.AI
+  tags:
+  - AI
+  - 每日
+  - 全量
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.AI
+- category: 论文全量
+  enabled: false
+  id: paper_arxiv_cl
+  name: arXiv CS.CL
+  tags:
+  - NLP
+  - 每日
+  - 全量
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.CL
+- category: 论文全量
+  enabled: false
+  id: paper_arxiv_cv
+  name: arXiv CS.CV
+  tags:
+  - CV
+  - 每日
+  - 全量
+  type: native_rss
+  url: https://rss.arxiv.org/rss/cs.CV
