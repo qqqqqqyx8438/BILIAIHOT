@@ -233,3 +233,14 @@ sources:
   - 全量
   type: native_rss
   url: https://rss.arxiv.org/rss/cs.CV
+- category: AI早报
+  cross_verify: true
+  enabled: true
+  id: briefing_juya
+  name: 橘鸦AI早报
+  tags:
+  - 每日精选
+  - 交叉验证
+  - 中文摘要
+  type: daily_briefing
+  url: https://daily.juya.uk/rss.xml
