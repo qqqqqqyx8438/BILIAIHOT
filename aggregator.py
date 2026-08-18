@@ -49,6 +49,22 @@ def extract_source_name(author_str):
     return author_str
 
 # -- fetch --
+def extract_original_url(entry):
+    """Extract original source URL from AIHOT description.
+    AIHOT format: '... 🔗 [阅读原文](https://original.url) via AIHOT · [站内](https://aihot...)'
+    """
+    raw_desc = entry.get("summary", "") + entry.get("description", "")
+    # Match markdown link [阅读原文](URL)
+    m = re.search(r"阅读原文\]?\(?(https?://[^\s\)]+)", raw_desc)
+    if m:
+        return m.group(1)
+    # Fallback: first non-aihot URL in the description
+    for m in re.finditer(r'https?://[^\s"<>)]+', raw_desc):
+        u = m.group(0)
+        if "aihot.virxact.com" not in u and "daily.juya.uk" not in u:
+            return u.rstrip(".,;")
+    return entry.get("link", "")
+
 def fetch(url, label):
     items = []
     try:
@@ -59,9 +75,11 @@ def fetch(url, label):
         if feed.bozo and not feed.entries:
             return items
         for e in feed.entries:
+            original = extract_original_url(e)
             items.append(dict(
                 title=e.get("title",""),
                 url=e.get("link",""),
+                original_url=original,  # 原始来源 URL
                 summary=strip_html(e.get("summary", e.get("description","")))[:500],
                 published=e.get("published", e.get("updated","")),
                 author=e.get("author",""),
@@ -271,7 +289,7 @@ def aggregate(cfg):
 
             item = dict(
                 title=e["title"],
-                url=e["url"],
+                url=e.get("original_url") or e["url"],  # 用原始来源URL
                 summary=e["summary"],
                 published=e["published"],
                 source_id=src["id"],

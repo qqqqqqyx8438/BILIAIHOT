@@ -91,36 +91,27 @@ async function r1(){
 if(!D||!D.hot_topics||D.hot_topics.length===0){
 document.getElementById("c").innerHTML='<div class="empty">No data</div>';return
 }
-var h='<div class="stats-bar"><div class="stat"><div class="val">'+D.hot_topics.length+'</div><div class="lbl">Scanning</div></div></div>';
+var h='<div class="stats-bar"><div class="stat"><div class="val">'+D.hot_topics.length+'</div><div class="lbl">Events</div></div><div class="stat"><div class="val">48h</div><div class="lbl">Bilibili window</div></div></div>';
 D.hot_topics.forEach(function(t,i){
 h+='<div class="topic-card">';
 h+='<div class="topic-header"><div class="rank'+(t.rank>3?' small':'')+'">#'+t.rank+'</div><div class="topic-info"><div class="topic-title">'+t.event+'<span class="badge">'+t.resonance+' sources</span></div></div></div>';
 h+='<div class="section-divider"><div class="line"></div><span>BILIBILI 48H TOP10</span><div class="line"></div></div>';
-h+='<div class="loading" id="bl'+i+'"><div class="spinner"></div>Searching Bilibili for: '+t.search_query+'</div>';
+h+='<div class="loading" id="bl'+i+'"><div class="spinner"></div>Loading static recommendations...</div>';
 h+='<div class="video-grid" id="bv'+i+'"></div></div>';
 });
 document.getElementById("c").innerHTML=h;
-D.hot_topics.forEach(function(t,i){f(t.search_query,i)});
-}
-async function f(k,i){
-var le=document.getElementById("bl"+i);
-var ve=document.getElementById("bv"+i);
-if(B[k]){rv(ve,le,B[k]);return}
 try{
-// Try direct B站 API call from browser (has real Chrome TLS fingerprint)
-var u="https://api.bilibili.com/x/web-interface/search/type?search_type=video&order=pubdate&duration=2&page=1&keyword="+encodeURIComponent(k);
-var r=await fetch(u,{headers:{Referer:"https://www.bilibili.com"}});
-var d=await r.json();
-if(d.code===0&&d.data&&d.data.result){
-var cut=Date.now()-48*60*60*1000;
-var v=d.data.result.filter(function(x){return x.pubdate*1000>cut}).sort(function(a,b){return b.play-a.play}).slice(0,10);
-B[k]=v;
-rv(ve,le,v);
-}else{
-if(le)le.innerHTML='<div class="empty">No videos found</div>';
-}
+var response=await fetch("data/bilibili.json");
+var payload=await response.json();
+D.hot_topics.forEach(function(t,i){
+var entry=(payload.topics||{})[String(t.rank)]||{};
+rv(document.getElementById("bv"+i),document.getElementById("bl"+i),entry.videos||[]);
+});
 }catch(e){
-if(le)le.innerHTML='<div class="empty">CORS blocked. Try proxy: /api/bilibili-search?keyword='+encodeURIComponent(k)+'</div>';
+D.hot_topics.forEach(function(t,i){
+var le=document.getElementById("bl"+i);
+if(le)le.innerHTML='<div class="empty">Bilibili data unavailable: '+e.message+'</div>';
+});
 }
 }
 function rv(ve,le,v){
@@ -128,7 +119,10 @@ if(le)le.style.display="none";
 if(!v||v.length===0){ve.innerHTML='<div class="empty">No 48h videos</div>';return}
 ve.innerHTML=v.map(function(x){
 var ps=x.play>10000?Math.floor(x.play/10000)+"w":x.play;
-return '<a href="https://www.bilibili.com/video/'+x.bvid+'" target="_blank" class="video-card"><div class="video-cover"><img src="'+x.pic.replace("http:","https:")+'" loading="lazy" onerror="this.style.display=\'none\'"><div class="video-play">'+ps+' plays</div></div><div class="video-info"><div class="video-title">'+x.title+'</div><div class="video-meta"><span>'+x.author+'</span><span class="bv">'+x.bvid+'</span></div></div></a>';
+var pic=x.pic||"";
+if(pic.indexOf("//")===0){pic="https:"+pic;}
+else if(pic.indexOf("http:")===0){pic=pic.replace("http:","https:");}
+return '<a href="https://www.bilibili.com/video/'+x.bvid+'" target="_blank" class="video-card"><div class="video-cover"><img src="'+pic+'" referrerpolicy="no-referrer" loading="lazy" onerror="this.style.display=\'none\'"><div class="video-play">'+ps+' plays</div></div><div class="video-info"><div class="video-title">'+x.title+'</div><div class="video-meta"><span>'+x.author+'</span><span class="bv">'+x.bvid+'</span></div></div></a>';
 }).join("");
 }
 L();

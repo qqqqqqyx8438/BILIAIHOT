@@ -1,8 +1,19 @@
-﻿# AI 热点看板数据目录（自动生成，不入库）
+# Runtime-generated feed data is rebuilt by GitHub Actions and local runs.
 data/
 *.pyc
 __pycache__/
-# 临时文件
-fix.py
-show.py
 .DS_Store
+
+# Local debugging scripts and temporary backups.
+check_*.py
+debug*.py
+dump_*.py
+fix_*.py
+show*.py
+test_*.py
+verify_*.py
+update_*.py
+write_html*.py
+server.py.bak
+
+fix.py

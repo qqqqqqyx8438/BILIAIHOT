@@ -1,118 +1,115 @@
-﻿import json, re, sys, io
+import json, re, sys, io
 from pathlib import Path
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
+from collections import defaultdict
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-DATA = Path("C:/Users/qiyanxi/Bitto/default/ai-hotboard/data")
+BASE_DIR = Path(__file__).resolve().parent
+DATA = BASE_DIR / "data"
 
 items = json.loads((DATA / "ai_feed.json").read_text(encoding="utf-8"))
 now = datetime.now()
 cutoff = now - timedelta(hours=48)
 recent = [it for it in items if parsedate_to_datetime(it.get("published","")).replace(tzinfo=None) >= cutoff]
-print("Recent (48h): {}".format(len(recent)))
 
-# Filter out garbage items
-good = []
-bad_patterns = [
-    r'^RT\s*@', r'^R\s+to\s+@', r'^Pinned:', r'^(Just|Check|Try)\s',
-    r'^\s*$', r'^🤔', r'^🔥', r'^\d+%', r'^@\w+$',
-]
-for it in recent:
-    title = it.get("title","").strip()
-    skip = False
-    for pat in bad_patterns:
-        if re.search(pat, title):
-            skip = True
-            break
-    if not skip and len(title) > 10:
-        good.append(it)
-print("Good items: {}".format(len(good)))
+# Split Chinese anchors vs English candidates
+zh = [it for it in recent if re.search(r'[\u4e00-\u9fff]', it.get("title",""))]
+en = [it for it in recent if not re.search(r'[\u4e00-\u9fff]', it.get("title",""))]
+print("Chinese anchors: {}, English candidates: {}".format(len(zh), len(en)))
 
-# Use summaries for matching - they are cleaner
-def extract_named_entities(text):
-    """Extract named entities: companies, products, models"""
+def extract_entities(text):
+    """Extract entities: model names, companies, products (bilingual)"""
     ents = set()
-    # Companies
-    companies = ["OpenAI","Anthropic","NVIDIA","英伟达","DeepSeek","Meta","Google","谷歌",
-                 "Microsoft","微软","xAI","Mistral","Perplexity","Runway","Manus",
-                 "宇树科技","智谱","通义千问","千问","百灵","面壁","火山引擎",
-                 "字节跳动","腾讯","阿里","华为","商汤","SpaceX","Tesla"]
-    text_lower = text.lower()
-    for c in companies:
-        if c.lower() in text_lower:
-            ents.add(c)
-    # Models/Products
-    models = re.findall(r'(GPT[-\s]?\d+\.?\d*\s*\w*|Claude\s*[A-Z]\w*\s*\d+\.?\d*|Gemini\s*\d+\.?\d*|'
-                         r'Nemotron[-\s]?\d+\.?\d*\s*\w*|Llama[-\s]?\d+|Muse\s*\w+|Grok[-\s]?\d+\.?\d*|'
-                         r'Seedance[-\s]?\d+\.?\d*|Qwen[-\s]?\d+\.?\d*|LTX[-\s]?\d+\.?\d*|'
-                         r'Cosmos\s*\d|WeatherNext|IndexTTS|Wan\d+\.?\d+|GLM[-\s]?\d+\.?\d*|'
-                         r'Mojo\s*1\.\d|Astra|Opus\s*\d+\.?\d*|Fable\s*\d+|SGLang|OpenClaw)', text, re.I)
-    for m in models:
-        ents.add(m.strip())
+    # Model names with version
+    for m in re.findall(r'(Nemotron[-\s]?\d+\.?\d*|GPT[-\s]?\d+\.?\d*|Claude\s+\w+|'
+                         r'Gemini\s*\d+\.?\d*|Llama[-\s]?\d+\.?\d*|Muse\s+\w+|'
+                         r'Grok[-\s]?\d+\.?\d*|Seedance[-\s]?\d+\.?\d*|Qwen[-\s]?\d+[-\w.]*|'
+                         r'LTX[-\s]?\d+\.?\d*|Cosmos\s*\d|WeatherNext|IndexTTS[-\s]?\d+\.?\d*|'
+                         r'Wan\d+\.?\d*|GLM[-\s]?\d+\.?\d*|Mojo\s*1\.\d|Astra|'
+                         r'Opus\s*\d+\.?\d*|Fable\s*\d+|SGLang|OpenClaw|VoiceChat|'
+                         r'MAI[-\w]*|DeepSeek[-\s]?\w*|NemotronLabs\s*\w+)', text, re.I):
+        ents.add(m.strip().lower())
+    # Companies (bilingual)
+    for m in re.findall(r'(OpenAI|Anthropic|NVIDIA|英伟达|DeepSeek|Meta|Google|谷歌|微软|Microsoft|'
+                         r'xAI|Mistral|Perplexity|Runway|Manus|宇树|智谱|通义千问|千问|'
+                         r'百灵|面壁|火山引擎|字节|腾讯|阿里|华为|商汤|SpaceX|Cursor|'
+                         r'OpenRouter|紫东太初|擎羽|群青|智象未来|HiDream)', text, re.I):
+        ents.add(m.lower())
     return ents
 
-# For each good item: extract entities from summary
-for it in good:
-    it["ents"] = extract_named_entities(it.get("summary","") + " " + it.get("title",""))
+for it in recent:
+    it["ents"] = extract_entities(it.get("title","") + " " + it.get("summary","")[:300])
 
-# Cluster: group items sharing >= 2 named entities
+# For each Chinese anchor, find related items (zh + en) sharing entities
 clusters = []
-assigned = set()
-for it in good:
-    fp = it.get("fingerprint","")
-    if fp in assigned: continue
-    if not it["ents"]: continue  # skip items without identifiable entities
-    
-    cluster = [it]
-    assigned.add(fp)
-    for other in good:
+used = set()
+
+# Sort zh anchors by title quality (shorter, more specific first)
+zh_sorted = sorted(zh, key=lambda x: len(x.get("title","")))
+
+for anchor in zh_sorted:
+    fp = anchor.get("fingerprint","")
+    if fp in used:
+        continue
+    ents = anchor["ents"]
+    if not ents:
+        continue
+
+    # Find related items
+    related = [anchor]
+    used.add(fp)
+    for other in recent:
         ofp = other.get("fingerprint","")
-        if ofp in assigned: continue
-        shared = it["ents"] & other["ents"]
-        if len(shared) >= 2:
-            cluster.append(other)
-            assigned.add(ofp)
-    
-    if len(cluster) >= 2:
-        # Pick best event name: prefer item with most descriptive title
-        # Score: Chinese > English, shorter > longer, has company name
-        def score_title(x):
-            t = x.get("title","")
-            s = 0
-            if re.search(r'[\u4e00-\u9fff]', t): s += 100
-            s -= len(t)  # shorter is better
-            if any(c.lower() in t.lower() for c in ["发布","推出","开源","上市","发布","突破","达成"]): s += 50
-            return s
-        
-        cluster.sort(key=score_title, reverse=True)
-        event_name = cluster[0].get("title","")[:100]
-        
-        sources = {}
-        for c in cluster:
-            sn = c.get("source_name","unknown")
-            if sn not in sources:
-                sources[sn] = {"name": sn, "url": c.get("url",""), "title": c.get("title","")[:80]}
-        
-        # Search query from shared entities
-        sq = " ".join(list(it["ents"])[:3])
-        
-        clusters.append({
-            "event": event_name,
-            "resonance": len(sources),
-            "item_count": len(cluster),
-            "sources": list(sources.values()),
-            "search_query": sq,
-        })
+        if ofp in used:
+            continue
+        if ents & other["ents"]:
+            related.append(other)
+            used.add(ofp)
 
+    sources = {}
+    for c in related:
+        sn = c.get("source_name","unknown")
+        if sn not in sources:
+            sources[sn] = {"name": sn, "url": c.get("url",""), "title": c.get("title","")[:80]}
+
+    # Search query = entities
+    search_query = " ".join(sorted(ents, key=lambda x: -len(x))[:2])
+
+    clusters.append({
+        "event": anchor.get("title","")[:100],
+        "resonance": len(sources),
+        "item_count": len(related),
+        "sources": list(sources.values()),
+        "search_query": search_query,
+    })
+
+# Sort by resonance
 clusters.sort(key=lambda x: -x["resonance"])
-clusters = [c for c in clusters if c["resonance"] >= 2][:15]
 
-print("\nEvent Topics: {}".format(len(clusters)))
-for i, c in enumerate(clusters):
-    print("  {:2}. [{} src] {}".format(i+1, c["resonance"], c["event"][:90]))
-    for s in c["sources"][:3]:
-        print("       - {}".format(s["name"][:45]))
+# Take top 10, but ensure min resonance 1
+top = clusters[:10]
+
+# If still < 10, add remaining zh anchors as singles
+if len(top) < 10:
+    for anchor in zh_sorted:
+        if len(top) >= 10:
+            break
+        if anchor.get("fingerprint","") in used:
+            continue
+        top.append({
+            "event": anchor.get("title","")[:100],
+            "resonance": 1,
+            "item_count": 1,
+            "sources": [{"name": anchor.get("source_name",""), "url": anchor.get("url",""), "title": anchor.get("title","")[:80]}],
+            "search_query": " ".join(sorted(anchor["ents"], key=lambda x: -len(x))[:2]) or anchor.get("title","")[:30],
+        })
+    top.sort(key=lambda x: -x["resonance"])
+
+print("\nEvent Topics: {}".format(len(top)))
+for i, c in enumerate(top):
+    print("  {:2}. [{} src] {}".format(i+1, c["resonance"], c["event"][:70]))
+    print("      query: {}".format(c["search_query"]))
 
 dashboard = {
     "generated_at": now.isoformat(),
@@ -124,8 +121,8 @@ dashboard = {
         "item_count": c["item_count"],
         "sources": c["sources"],
         "search_query": c["search_query"],
-    } for i, c in enumerate(clusters, 1)]
+    } for i, c in enumerate(top, 1)]
 }
 
 (DATA / "dashboard.json").write_text(json.dumps(dashboard, ensure_ascii=False, indent=2), encoding="utf-8")
-print("\nSaved {} topics".format(len(clusters)))
+print("\nSaved {} topics".format(len(top)))
