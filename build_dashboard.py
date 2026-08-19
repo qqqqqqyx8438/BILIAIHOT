@@ -8,10 +8,34 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 BASE_DIR = Path(__file__).resolve().parent
 DATA = BASE_DIR / "data"
 
+def parse_dt(raw):
+    if not raw: return datetime.min
+    try:
+        return parsedate_to_datetime(raw).replace(tzinfo=None)
+    except Exception:
+        pass
+    try:
+        return datetime.fromisoformat(raw).replace(tzinfo=None)
+    except Exception:
+        return datetime.min
+
+
+def parse_dt(raw):
+    if not raw: return datetime.min
+    try:
+        return parsedate_to_datetime(raw).replace(tzinfo=None)
+    except Exception:
+        pass
+    try:
+        return datetime.fromisoformat(raw).replace(tzinfo=None)
+    except Exception:
+        return datetime.min
+
+
 items = json.loads((DATA / "ai_feed.json").read_text(encoding="utf-8"))
 now = datetime.now()
 cutoff = now - timedelta(hours=48)
-recent = [it for it in items if parsedate_to_datetime(it.get("published","")).replace(tzinfo=None) >= cutoff]
+recent = [it for it in items if parse_dt(it.get("published","")) >= cutoff]
 
 # Split Chinese anchors vs English candidates
 zh = [it for it in recent if re.search(r'[\u4e00-\u9fff]', it.get("title",""))]

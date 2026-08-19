@@ -19,8 +19,14 @@ UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
 # -- helpers --
 def parse_dt(raw):
     if not raw: return datetime.min
-    try: return parsedate_to_datetime(raw).replace(tzinfo=None)
-    except: return datetime.min
+    try:
+        return parsedate_to_datetime(raw).replace(tzinfo=None)
+    except Exception:
+        pass
+    try:
+        return datetime.fromisoformat(raw).replace(tzinfo=None)
+    except Exception:
+        return datetime.min
 
 def strip_html(text):
     return re.sub(r"<[^>]+>", "", text).strip()
@@ -34,20 +40,16 @@ def load_cfg():
 
 # -- extract source name from AIHOT author field --
 def extract_source_name(author_str):
-    """Extract source name from AIHOT author format:
-    'noreply@aihot.virxact.com (IT之家（RSS）)' -> 'IT之家'
-    'noreply@aihot.virxact.com (X：OpenAI (@OpenAI))' -> 'X：OpenAI'
-    """
-    if not author_str: return "unknown"
-    m = re.search(r"\((.+?)\)$", author_str)
-    if m:
-        raw = m.group(1)
-        # Clean up: remove trailing （RSS）/（网页） etc
-        raw = re.sub(r"[（(](?:RSS|网页|发表成果|社区热门论文)[）)]", "", raw)
-        raw = re.sub(r"\s*·\s*.*$", "", raw)  # remove " · 排除企业/客户案例"
-        return raw.strip()
-    return author_str
-
+    """Normalize AIHOT author -> source name, strip handles/descriptors."""
+    if not author_str:
+        return "unknown"
+    m = re.search(r"\((.+)\)$", author_str)
+    raw = m.group(1) if m else author_str
+    prev = None
+    while prev != raw:
+        prev = raw
+        raw = re.sub(r"[ \t]*[（(][^（）()]*[）)][ \t]*$", "", raw).strip()
+    return raw.strip() or author_str
 # -- fetch --
 def extract_original_url(entry):
     """Extract original source URL from AIHOT description.

@@ -69,7 +69,7 @@ sources:
 - category: KOL
   enabled: true
   id: x_karpathy
-  name: Andrej Karpathy
+  name: X：Andrej Karpathy
   tags:
   - OpenAI
   - 教育
@@ -78,7 +78,7 @@ sources:
 - category: KOL
   enabled: true
   id: x_sama
-  name: Sam Altman
+  name: X：Sam Altman
   tags:
   - OpenAI
   - AGI
@@ -87,7 +87,7 @@ sources:
 - category: KOL
   enabled: true
   id: x_ylecun
-  name: Yann LeCun
+  name: X：Yann LeCun
   tags:
   - Meta
   - 学术
@@ -96,7 +96,7 @@ sources:
 - category: KOL
   enabled: true
   id: x_andrewng
-  name: Andrew Ng
+  name: X：Andrew Ng
   tags:
   - AI教育
   - 创业
@@ -105,7 +105,7 @@ sources:
 - category: KOL
   enabled: true
   id: x_jimfan
-  name: Jim Fan
+  name: X：Jim Fan
   tags:
   - NVIDIA
   - 具身智能
@@ -114,7 +114,7 @@ sources:
 - category: 企业官号
   enabled: true
   id: x_deepseek
-  name: DeepSeek
+  name: X：DeepSeek
   tags:
   - DeepSeek
   - 国产
@@ -123,7 +123,7 @@ sources:
 - category: 企业官号
   enabled: true
   id: x_perplexity
-  name: Perplexity
+  name: X：Perplexity
   tags:
   - AI搜索
   type: native_rss
@@ -131,7 +131,7 @@ sources:
 - category: 企业官号
   enabled: true
   id: x_cursor
-  name: Cursor
+  name: X：Cursor
   tags:
   - AI编程
   type: native_rss
@@ -139,7 +139,7 @@ sources:
 - category: 企业官号
   enabled: true
   id: x_mistral
-  name: Mistral AI
+  name: X：Mistral AI
   tags:
   - 开源
   - 欧洲
@@ -148,7 +148,7 @@ sources:
 - category: 企业官号
   enabled: true
   id: x_huggingface
-  name: Hugging Face
+  name: X：Hugging Face
   tags:
   - 开源
   - 模型
@@ -244,3 +244,120 @@ sources:
   - 中文摘要
   type: daily_briefing
   url: https://daily.juya.uk/rss.xml
+- category: 企业官号
+  enabled: true
+  id: x_openai
+  name: X：OpenAI
+  tags:
+  - OpenAI
+  - 官号
+  type: native_rss
+  url: https://nitter.net/OpenAI/rss
+- category: 企业官号
+  enabled: true
+  id: openai_news
+  name: OpenAI：官网动态
+  tags:
+  - OpenAI
+  - 官方
+  type: native_rss
+  url: https://openai.com/news/rss.xml
+- category: KOL
+  enabled: true
+  id: x_kim
+  name: X：Kim
+  tags:
+  - AI
+  - 观点
+  type: native_rss
+  url: https://nitter.net/kimmonismus/rss
+- category: KOL
+  enabled: true
+  id: x_jakub
+  name: X：Jakub Pachocki
+  tags:
+  - OpenAI
+  - 首席科学家
+  type: native_rss
+  url: https://nitter.net/merettm/rss
+- category: KOL
+  enabled: true
+  id: x_gdb
+  name: X：Greg Brockman
+  tags:
+  - OpenAI
+  - 联创
+  type: native_rss
+  url: https://nitter.net/gdb/rss
+- category: KOL
+  enabled: true
+  id: x_rohanpaul
+  name: X：Rohan Paul
+  tags:
+  - AI
+  - 资讯
+  type: native_rss
+  url: https://nitter.net/rohanpaul_ai/rss
+- category: KOL
+  enabled: true
+  id: x_testingcatalog
+  name: X：Testing Catalog
+  tags:
+  - AI评测
+  - 产品
+  type: native_rss
+  url: https://nitter.net/testingcatalog/rss
+- category: KOL
+  enabled: true
+  id: x_steipete
+  name: X：Peter Steinberger
+  tags:
+  - AI
+  - 开发者
+  type: native_rss
+  url: https://nitter.net/steipete/rss
+- category: KOL
+  enabled: true
+  id: x_gabriel
+  name: X：Gabriel
+  tags:
+  - AI
+  - 观点
+  type: native_rss
+  url: https://nitter.net/gabriel1/rss
+- category: KOL
+  enabled: true
+  id: x_xiaobei
+  name: X：小北
+  tags:
+  - AI
+  - 中文KOL
+  type: native_rss
+  url: https://nitter.net/frxiaobei/rss
+- category: 国际媒体
+  enabled: true
+  id: media_techcrunch_ai
+  name: TechCrunch：AI
+  tags:
+  - AI
+  - 媒体
+  type: native_rss
+  url: https://techcrunch.com/category/artificial-intelligence/feed/
+- category: 国际媒体
+  enabled: true
+  id: media_decoder
+  name: The Decoder：AI News
+  tags:
+  - AI
+  - 媒体
+  type: native_rss
+  url: https://the-decoder.com/feed/
+- category: 国际媒体
+  enabled: true
+  id: media_verge_ai
+  name: The Verge：AI
+  tags:
+  - AI
+  - 媒体
+  type: native_rss
+  url: https://www.theverge.com/rss/ai-artificial-intelligence/index.xml
